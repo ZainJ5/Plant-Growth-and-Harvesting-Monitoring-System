@@ -1,7 +1,14 @@
 import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { LogOut, Leaf } from 'lucide-react';
 
 const Dashboard = ({ onLogout }) => {
+  const navigate = useNavigate();
+
+  const handleLogOut = () => {
+
+    navigate("/login");
+  }
   return (
     <div className="p-10 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto">
@@ -15,7 +22,7 @@ const Dashboard = ({ onLogout }) => {
           </div>
           
           <button 
-            onClick={onLogout}
+            onClick = {handleLogOut}
             className="flex items-center gap-2 text-red-500 font-semibold hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
           >
             <LogOut size={20} />

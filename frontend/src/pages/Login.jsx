@@ -1,14 +1,23 @@
 import React from 'react';
 import { User, Lock } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
 
-// Note: We added 'onNavigate' to the props here
-const LoginPage = ({ onLogin, onNavigate }) => {
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // check credentials here in the future
+
+    navigate('/dashboard');
+
+  }
   return (
     <AuthLayout title="Welcome Back" subtitle="Monitor your growth & harvest in real-time">
-      <form onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
         
         <InputField 
           label="Email Address" 
@@ -32,7 +41,7 @@ const LoginPage = ({ onLogin, onNavigate }) => {
           </div>
         </div>
 
-        <PrimaryButton onClick={onLogin}>
+        <PrimaryButton type="submit">
           Sign In to Dashboard
         </PrimaryButton>
       </form>
@@ -41,12 +50,9 @@ const LoginPage = ({ onLogin, onNavigate }) => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-500">
           Don't have an account?{' '}
-          <button 
-            onClick={() => onNavigate('signup')} 
-            className="font-bold text-green-600 hover:text-green-500 hover:underline"
-          >
+          <Link to="/signup" className="font-bold text-green-600 hover:text-green-500 hover:underline">
             Register here
-          </button>
+          </Link>
         </p>
       </div>
     </AuthLayout>

@@ -1,13 +1,22 @@
 import React from 'react';
 import { User, Mail, Lock } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
 
-const SignupPage = ({ onNavigate, onLogin }) => {
+const SignupPage = () => {
+  const navigate = useNavigate();
+
+  const handleSignUp = (e) => {
+    e.preventDefault();
+
+    navigate('/dashboard');
+  }
+  
   return (
     <AuthLayout title="Create Account" subtitle="Join the smart agriculture network">
-      <form onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+      <form onSubmit={handleSignUp}>
         
         {/* Row for First & Last Name */}
         <div className="flex gap-4">
@@ -52,7 +61,7 @@ const SignupPage = ({ onNavigate, onLogin }) => {
           />
         </div>
 
-        <PrimaryButton onClick={onLogin}>
+        <PrimaryButton type="submit">
           Create Dashboard
         </PrimaryButton>
       </form>
@@ -61,12 +70,12 @@ const SignupPage = ({ onNavigate, onLogin }) => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-500">
           Already have an account?{' '}
-          <button 
-            onClick={() => onNavigate('login')} 
+          <Link 
+            to="/login" 
             className="font-bold text-green-600 hover:text-green-500 hover:underline"
           >
             Sign In
-          </button>
+          </Link>
         </p>
       </div>
     </AuthLayout>
