@@ -1,20 +1,40 @@
 import React, { useState } from 'react';
 
-import Login from './pages/Login';
+import LoginPage from './pages/Login';
+import SignupPage from './pages/SignUp'
 import Dashboard from './pages/Dashboard';
 
 export default function App() {
+  // We track the specific page name now: 'login', 'signup', or 'dashboard'
+  const [currentPage, setCurrentPage] = useState('login');
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const handleLogin = () => {
+    setCurrentPage('dashboard');
+  };
 
+  const handleLogout = () => {
+    setCurrentPage('login');
+  };
+
+  // Managinh the routing
   return (
     <div>
-      {isLoggedIn ? (
-        // If logged in, show Dashboard and pass the logout function
-        <Dashboard onLogout={() => setIsLoggedIn(false)} />
-      ) : (
-        // If NOT logged in, show Login Page and pass the login function
-        <Login onLogin={() => setIsLoggedIn(true)} />
+      {currentPage === 'login' && (
+        <LoginPage 
+          onLogin={handleLogin} 
+          onNavigate={setCurrentPage} // Pass the function to switch pages
+        />
+      )}
+      
+      {currentPage === 'signup' && (
+        <SignupPage 
+          onLogin={handleLogin} 
+          onNavigate={setCurrentPage} 
+        />
+      )}
+      
+      {currentPage === 'dashboard' && (
+        <Dashboard onLogout={handleLogout} />
       )}
     </div>
   );
