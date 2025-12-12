@@ -1,5 +1,6 @@
 import React from 'react';
-import { User, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { User, Lock, Mail } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
@@ -8,6 +9,41 @@ import PrimaryButton from '../components/PrimaryButton';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+      email: '',
+      password: ''
+    });
+
+  // maps for input fields
+  const formFields = [
+    { 
+      id: 'email', 
+      name: 'email', 
+      label: 'Email Address', 
+      type: 'email', 
+      placeholder: 'name@giki.edu.pk', 
+      icon: <Mail size={18} /> 
+    },
+    { 
+      id: 'password', 
+      name: 'password', 
+      label: 'Password', 
+      type: 'password', 
+      placeholder: 'Create a password', 
+      icon: <Lock size={18} /> 
+    }
+  ];
+
+  // generic handler
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleLogin = () => {
     // check credentials here in the future
@@ -19,27 +55,18 @@ const LoginPage = () => {
     <AuthLayout title="Welcome Back" subtitle="Monitor your growth & harvest in real-time">
       <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
         
-        <InputField 
-          label="Email Address" 
-          type="email" 
-          placeholder="name@giki.edu.pk" 
-          icon={<User size={18} />} 
-        />
-        
-        <div className="mb-6">
+        {formFields.map((field) => (
           <InputField 
-            label="Password" 
-            type="password" 
-            placeholder="••••••••" 
-            icon={<Lock size={18} />} 
+            key={field.id}
+            label={field.label}
+            name={field.name}
+            type={field.type}
+            placeholder={field.placeholder}
+            icon={field.icon}
+            value={formData[field.name]} 
+            onChange={handleChange}      
           />
-          {/* Forgot Password Link */}
-          <div className="flex justify-end mt-1">
-            <a href="#" className="text-sm font-medium text-green-600 hover:text-green-500 hover:underline">
-              Forgot Password?
-            </a>
-          </div>
-        </div>
+        ))}
 
         <PrimaryButton type="submit">
           Sign In to Dashboard
