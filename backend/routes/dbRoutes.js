@@ -69,4 +69,54 @@ router.post("/api/user/insert", async (req, res) => {
     }
 });
 
+router.post("/api/login", async (req, res) => {
+    try {
+        // Receiving the user data here
+        const data = req.body.data;
+
+        if (!data) {
+            return res.status(400).json({ 
+                success: false, message: "No data provided."
+            });
+        }        
+
+        // Now check if the email already exists in the database
+        const q = query(
+            collection(db, "users"), where("email", "==", data.email)
+        );
+
+        let result = await getData(q);
+
+        if (result.length <= 0) { // empty array returned (user does not exist)
+            return res.status(404).json({ 
+                success: false, message: "User not found."
+            });
+        }
+
+        // user found, extract the data into person
+        let person = result[0];
+
+        if (!person.password) {
+            return res.status(400).json({ 
+                success: false, message: "Password not provided."
+            });
+        }
+
+        if (!(await bcrypt.compare(data.password, person.password))) {
+            return res.status(400).json({ 
+                success: false, message: "Wrong password."
+            });
+        };
+
+        return res.status(200).json({
+            success: true
+        });
+    }
+    catch(error) {
+        res.status(500).json({ 
+            success: false, message: `Could not authenticate, Error: ${error}`
+        });
+    }
+});
+
 export default router;
