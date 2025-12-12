@@ -1,6 +1,6 @@
 import express from "express";
 import { connectDB } from "./utils/db.js";
-import dbRoutes from "./routes/dbRoutes.js";
+import dbRoutes from "./routes/authRoutes.js";
 import dotenv from "dotenv";
 import memorystore from "memorystore";
 import session from "express-session";

@@ -1,6 +1,6 @@
 /*
-* This file contains database routes that can be directly used in the front and
-  backend of the code.
+* This file contains authentication routes that can be directly used in the 
+  front and backend of the code.
 */
 import { db, insertData, getData } from "../utils/db.js";
 import express from "express";
@@ -13,7 +13,7 @@ const router = express.Router();
 * Insert user into the database
 * Returns: an object with success for error handling and if false, contains an
     error message.
-* Accepts an object with name data in the request body.
+* Accepts an object named data in the request body.
 * With types:
 *   data = {
         firstname: string,
@@ -25,7 +25,7 @@ const router = express.Router();
 * Document/user id is assigned randomly.
 * password stored is encrypted using bcrypt.
 */
-router.post("/api/user/insert", async (req, res) => {
+router.post("/api/signup", async (req, res) => {
     try {
         // Receiving the user data here
         const data = req.body.data;
@@ -69,6 +69,16 @@ router.post("/api/user/insert", async (req, res) => {
     }
 });
 
+/*
+* This function just checks for login.
+* Returns: an object containing success which if false has some message attached
+* Accepts an object named data in the request body.
+* With types:
+*   data = {
+        email: string,
+        password: string
+    }
+*/
 router.post("/api/login", async (req, res) => {
     try {
         // Receiving the user data here
@@ -102,12 +112,15 @@ router.post("/api/login", async (req, res) => {
             });
         }
 
+        // use bcrypt to compare the password provided with the hashed password
+        // in the database. The below condition is for mismatch.
         if (!(await bcrypt.compare(data.password, person.password))) {
             return res.status(400).json({ 
                 success: false, message: "Wrong password."
             });
         };
 
+        // User 100% matches
         return res.status(200).json({
             success: true
         });
