@@ -36,6 +36,14 @@ router.post("/api/signup", async (req, res) => {
             });
         }
 
+        if (!data.firstname || !data.lastname || !data.username || !data.email
+            || !data.password
+        ) {
+            return res.status(400).json({ 
+                success: false, message: "Insufficient data provided."
+            });
+        }
+
         // Now check if the email already exists in the database
         const q = query(
             collection(db, "users"), where("email", "==", data.email)
@@ -88,7 +96,13 @@ router.post("/api/login", async (req, res) => {
             return res.status(400).json({ 
                 success: false, message: "No data provided."
             });
-        }        
+        }      
+        
+        if (!data.email) {
+            return res.status(400).json({ 
+                success: false, message: "Email not provided."
+            });
+        }
 
         // Now check if the email already exists in the database
         const q = query(
@@ -106,7 +120,7 @@ router.post("/api/login", async (req, res) => {
         // user found, extract the data into person
         let person = result[0];
 
-        if (!person.password) {
+        if (!data.password) {
             return res.status(400).json({ 
                 success: false, message: "Password not provided."
             });
