@@ -10,8 +10,8 @@ const SignupPage = () => {
 
   // state variables
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    firstname: '',
+    lastname: '',
     username: '',
     email: '',
     password: ''
@@ -69,7 +69,7 @@ const SignupPage = () => {
       body: JSON.stringify({ data: formData })
     });
 
-    console.log(response);
+    console.log(await response.json());
 
     // navigate('/dashboard');
   }
@@ -83,8 +83,8 @@ const SignupPage = () => {
           <div className="w-1/2">
             <InputField 
               label="First Name" 
-              name="firstName"
-              value={formData.firstName}
+              name="firstname"
+              value={formData.firstname}
               onChange={handleChange}
               type="text" 
               placeholder="Jane" 
@@ -94,8 +94,8 @@ const SignupPage = () => {
           <div className="w-1/2">
             <InputField 
               label="Last Name" 
-              name="lastName"
-              value={formData.lastName}
+              name="lastname"
+              value={formData.lastname}
               onChange={handleChange}
               type="text" 
               placeholder="Doe" 

@@ -45,15 +45,25 @@ const LoginPage = () => {
     }));
   };
 
-  const handleLogin = () => {
-    // check credentials here in the future
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-    navigate('/dashboard');
+    console.log('Submitting Form:', formData);
+    const response = await fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type" : "application/json"
+      },
+      body: JSON.stringify({ data: formData })
+    });
 
+    console.log(await response.json());
+
+    // navigate('/dashboard');
   }
   return (
     <AuthLayout title="Welcome Back" subtitle="Monitor your growth & harvest in real-time">
-      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+      <form onSubmit={(e) => { handleLogin(e); }}>
         
         {formFields.map((field) => (
           <InputField 
