@@ -1,0 +1,149 @@
+/*
+* This file contains authentication routes that can be directly used in the 
+  front and backend of the code.
+*/
+import { db, insertData, getData } from "../utils/db.js";
+import express from "express";
+import bcrypt from "bcrypt";
+import { where, query, collection } from "firebase/firestore";
+
+const router = express.Router();
+
+/* 
+* Insert user into the database
+* Returns: an object with success for error handling and if false, contains an
+    error message.
+* Accepts an object named data in the request body.
+* With types:
+*   data = {
+        firstname: string,
+        lastname: string,
+        username: string with no spaces,
+        email: case sensitive string,
+        password: string
+    }
+* Document/user id is assigned randomly.
+* password stored is encrypted using bcrypt.
+*/
+router.post("/api/signup", async (req, res) => {
+    try {
+        // Receiving the user data here
+        const data = req.body.data;
+
+        if (!data) {
+            return res.status(400).json({ 
+                success: false, message: "No data provided."
+            });
+        }
+
+        if (!data.firstname || !data.lastname || !data.username || !data.email
+            || !data.password
+        ) {
+            return res.status(400).json({ 
+                success: false, message: "Insufficient data provided."
+            });
+        }
+
+        // Now check if the email already exists in the database
+        const q = query(
+            collection(db, "users"), where("email", "==", data.email)
+        );
+
+        let result = await getData(q);
+
+        if (result.length >= 1) { // some result returned (user exists)
+            return res.status(500).json({ 
+                success: false, message: "User already exists."
+            });
+        }
+
+        // Now hash the password and insert the data
+        let newData = {...data, password: await bcrypt.hash(data.password, 10)};
+        result = await insertData("users", newData);
+    
+        if (result.success == true) {
+            res.status(200).json({ success: true });
+        }
+        else {
+            res.status(500).json({ 
+                success: false, message: "Could not create user."
+            });
+        }
+    }
+    catch (error) {
+        res.status(500).json({ 
+            success: false, message: `Could not add user, Error: ${error}`
+        });
+    }
+});
+
+/*
+* This function just checks for login.
+* Returns: an object containing success which if false has some message attached
+* Accepts an object named data in the request body.
+* With types:
+*   data = {
+        email: string,
+        password: string
+    }
+*/
+router.post("/api/login", async (req, res) => {
+    try {
+        // Receiving the user data here
+        const data = req.body.data;
+
+        if (!data) {
+            return res.status(400).json({ 
+                success: false, message: "No data provided."
+            });
+        }      
+        
+        if (!data.email) {
+            return res.status(400).json({ 
+                success: false, message: "Email not provided."
+            });
+        }
+
+        // Now check if the email already exists in the database
+        const q = query(
+            collection(db, "users"), where("email", "==", data.email)
+        );
+
+        let result = await getData(q);
+
+        if (result.length <= 0) { // empty array returned (user does not exist)
+            return res.status(404).json({ 
+                success: false, message: "User not found."
+            });
+        }
+
+        // user found, extract the data into person
+        let person = result[0];
+
+        if (!data.password) {
+            return res.status(400).json({ 
+                success: false, message: "Password not provided."
+            });
+        }
+
+        // use bcrypt to compare the password provided with the hashed password
+        // in the database. The below condition is for mismatch.
+        if (!(await bcrypt.compare(data.password, person.password))) {
+            return res.status(400).json({ 
+                success: false, message: "Wrong password."
+            });
+        };
+
+        // User 100% matches
+        return res.status(200).json({
+            success: true
+        });
+    }
+    catch(error) {
+        res.status(500).json({ 
+            success: false, message: `Could not authenticate, Error: ${error}`
+        });
+    }
+});
+
+export default router;

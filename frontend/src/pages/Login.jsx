@@ -1,38 +1,84 @@
 import React from 'react';
-import { User, Lock } from 'lucide-react';
+import { useState } from 'react';
+import { User, Lock, Mail } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
 
-// Note: We added 'onNavigate' to the props here
-const LoginPage = ({ onLogin, onNavigate }) => {
+
+const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+      email: '',
+      password: ''
+    });
+
+  // maps for input fields
+  const formFields = [
+    { 
+      id: 'email', 
+      name: 'email', 
+      label: 'Email Address', 
+      type: 'email', 
+      placeholder: 'name@giki.edu.pk', 
+      icon: <Mail size={18} /> 
+    },
+    { 
+      id: 'password', 
+      name: 'password', 
+      label: 'Password', 
+      type: 'password', 
+      placeholder: 'Create a password', 
+      icon: <Lock size={18} /> 
+    }
+  ];
+
+  // generic handler
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    console.log('Submitting Form:', formData);
+    const response = await fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type" : "application/json"
+      },
+      body: JSON.stringify({ data: formData })
+    });
+
+    console.log(await response.json());
+
+    // navigate('/dashboard');
+  }
   return (
     <AuthLayout title="Welcome Back" subtitle="Monitor your growth & harvest in real-time">
-      <form onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+      <form onSubmit={(e) => { handleLogin(e); }}>
         
-        <InputField 
-          label="Email Address" 
-          type="email" 
-          placeholder="name@giki.edu.pk" 
-          icon={<User size={18} />} 
-        />
-        
-        <div className="mb-6">
+        {formFields.map((field) => (
           <InputField 
-            label="Password" 
-            type="password" 
-            placeholder="••••••••" 
-            icon={<Lock size={18} />} 
+            key={field.id}
+            label={field.label}
+            name={field.name}
+            type={field.type}
+            placeholder={field.placeholder}
+            icon={field.icon}
+            value={formData[field.name]} 
+            onChange={handleChange}      
           />
-          {/* Forgot Password Link */}
-          <div className="flex justify-end mt-1">
-            <a href="#" className="text-sm font-medium text-green-600 hover:text-green-500 hover:underline">
-              Forgot Password?
-            </a>
-          </div>
-        </div>
+        ))}
 
-        <PrimaryButton onClick={onLogin}>
+        <PrimaryButton type="submit">
           Sign In to Dashboard
         </PrimaryButton>
       </form>
@@ -41,12 +87,9 @@ const LoginPage = ({ onLogin, onNavigate }) => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-500">
           Don't have an account?{' '}
-          <button 
-            onClick={() => onNavigate('signup')} 
-            className="font-bold text-green-600 hover:text-green-500 hover:underline"
-          >
+          <Link to="/signup" className="font-bold text-green-600 hover:text-green-500 hover:underline">
             Register here
-          </button>
+          </Link>
         </p>
       </div>
     </AuthLayout>
