@@ -1,6 +1,7 @@
 import express from "express";
 import { connectDB } from "./utils/db.js";
 import dbRoutes from "./routes/dbRoutes.js";
+import userRoutes from "./routes/user.js";
 import dotenv from "dotenv";
 // import path from "path";
 // import { fileURLToPath } from "url";
@@ -10,10 +11,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
+// Middleware
 app.use(express.json());
-app.use(dbRoutes);
+
+// Routes
+app.use("/", dbRoutes);
+app.use("/user", userRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello World");
