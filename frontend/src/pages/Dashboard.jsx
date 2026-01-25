@@ -1,3 +1,4 @@
+import PlantScanner from '../components/PlantScanner';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -85,6 +86,10 @@ const [history, setHistory] = useState(() => {
             <h2 className="text-3xl font-black text-slate-800">32%</h2>
             <p className="text-slate-400 text-[10px] font-bold uppercase mt-2">Soil Moisture</p>
           </div>
+        </div>
+        {/* PASTE THE NEW COMPONENT HERE */}
+        <div className="mb-8">
+           <PlantScanner />
         </div>
 
         {/* SYSTEM CONTROLS WITH TOGGLE */}
