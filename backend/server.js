@@ -1,8 +1,8 @@
 import express from "express";
 import { connectDB } from "./utils/db.js";
-import dbRoutes from "./routes/dbRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/user.js";
+import plantRoutes from "./routes/plantRoutes.js";
 import dotenv from "dotenv";
 import memorystore from "memorystore";
 import session from "express-session";
@@ -35,9 +35,9 @@ app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:5173" }));
 
 // Routes
-app.use("/", dbRoutes);
 app.use("/", authRoutes);
 app.use("/user", userRoutes);
+app.use("/", plantRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello World");

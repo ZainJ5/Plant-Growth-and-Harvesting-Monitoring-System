@@ -1,7 +1,6 @@
-const axios = require('axios');
-require('dotenv').config();
+import axios from 'axios';
 
-const PLANT_ID_API_KEY = process.env.PLANT_ID_API_KEY;
+// const PLANT_ID_API_KEY = process.env.PLANTS_ID_API_KEY;
 const PLANT_ID_API_URL = 'https://api.plant.id/v3/identification';
 
 /**
@@ -9,7 +8,7 @@ const PLANT_ID_API_URL = 'https://api.plant.id/v3/identification';
  * @param {Buffer} imageBuffer - The image buffer from multer
  * @returns {string} Base64 encoded string
  */
-function convertBufferToBase64(imageBuffer) {
+export function convertBufferToBase64(imageBuffer) {
   return imageBuffer.toString('base64');
 }
 
@@ -18,7 +17,7 @@ function convertBufferToBase64(imageBuffer) {
  * @param {string} base64Image - Base64 encoded image string
  * @returns {Promise<Object>} Essential health results: is_healthy, disease names, and suggestions
  */
-async function identifyPlantHealth(base64Image) {
+export async function identifyPlantHealth(base64Image) {
   try {
     const response = await axios.post(
       PLANT_ID_API_URL,
@@ -28,15 +27,17 @@ async function identifyPlantHealth(base64Image) {
       },
       {
         headers: {
-          'Api-Key': PLANT_ID_API_KEY,
+          'Api-Key': process.env.PLANTS_ID_API_KEY,
           'Content-Type': 'application/json'
         }
       }
     );
 
     // Extract essential health results
-    const healthResult = response.data.health;
-    
+    const healthResult = response.data.result;
+
+    console.log(healthResult);
+
     if (!healthResult) {
       return {
         is_healthy: null,
@@ -46,20 +47,28 @@ async function identifyPlantHealth(base64Image) {
     }
 
     // Extract disease names
-    const diseases = healthResult.diseases 
-      ? healthResult.diseases.map(disease => ({
-          name: disease.name,
-          probability: disease.probability
+    const diseases = healthResult.disease
+      ? healthResult.disease.suggestions.map(dis => ({
+          name: dis.name,
+          probability: dis.probability,
+          suggestions: dis.suggestions
         }))
       : [];
 
+    const dieseasesQuestions = {
+      question: healthResult.disease.question.text,
+      options: healthResult.disease.question.options
+    };
+
     // Extract suggestions
-    const suggestions = healthResult.suggestions || [];
+    const classification = healthResult.classification.suggestions || [];
 
     return {
       is_healthy: healthResult.is_healthy,
+      is_plant: healthResult.is_plant,
       diseases: diseases,
-      suggestions: suggestions
+      dieseasesQuestions: dieseasesQuestions,
+      classification: classification
     };
 
   } catch (error) {
@@ -71,8 +80,3 @@ async function identifyPlantHealth(base64Image) {
     throw error;
   }
 }
-
-module.exports = {
-  convertBufferToBase64,
-  identifyPlantHealth
-};
