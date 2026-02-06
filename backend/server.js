@@ -3,6 +3,7 @@ import { connectDB } from "./utils/db.js";
 import dbRoutes from "./routes/dbRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/user.js";
+import plantRoutes from "./routes/plants.js";
 import dotenv from "dotenv";
 import memorystore from "memorystore";
 import session from "express-session";
@@ -38,6 +39,7 @@ app.use(cors({ origin: "http://localhost:5173" }));
 app.use("/", dbRoutes);
 app.use("/", authRoutes);
 app.use("/user", userRoutes);
+app.use("/api/plants", plantRoutes);
 
 app.get("/", (req, res) => {
     res.send("Hello World");

@@ -5,6 +5,7 @@
 import { db, insertData, getData } from "../utils/db.js";
 import express from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { where, query, collection } from "firebase/firestore";
 
 const router = express.Router();
@@ -134,9 +135,21 @@ router.post("/api/login", async (req, res) => {
             });
         };
 
-        // User 100% matches
+        // User 100% matches - Generate JWT Token
+        const token = jwt.sign(
+          { 
+            id: person.id, 
+            email: person.email, 
+            username: person.username || null 
+          },
+          process.env.JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+        
         return res.status(200).json({
-            success: true
+            success: true,
+            token: token,
+            message: 'Login successful'
         });
     }
     catch(error) {
