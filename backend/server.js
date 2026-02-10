@@ -16,23 +16,48 @@ import cors from "cors";
 // const __dirname = path.dirname(__filename);
 dotenv.config();
 
+// Fail fast if critical env vars are missing
+const requiredEnv = ['JWT_SECRET', 'SESSION_SECRET', 'PLANTS_ID_API_KEY'];
+const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+if (missingEnv.length > 0) {
+    // eslint-disable-next-line no-console
+    console.error(
+        `Missing required environment variables: ${missingEnv.join(
+            ', '
+        )}. Please define them in your environment (e.g. .env file).`
+    );
+    process.exit(1);
+}
+
 const app = express();
 const MemoryStore = memorystore(session);
 const port = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === "production";
 
 // Middleware
 app.use(express.json());
-app.use(session({
-    cookie: { maxAge: 86400000 },
-    store: new MemoryStore({
-        checkPeriod: 86400000
-    }),
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.SESSION_SECRET || "The Secret"
-}));
+app.use(
+    session({
+        cookie: {
+            maxAge: 86400000,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax"
+        },
+        store: new MemoryStore({
+            checkPeriod: 86400000
+        }),
+        resave: false,
+        saveUninitialized: false,
+        secret: process.env.SESSION_SECRET
+    })
+);
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true
+    })
+);
 
 // Routes
 app.use("/", authRoutes);

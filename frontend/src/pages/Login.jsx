@@ -48,18 +48,29 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    console.log('Submitting Form:', formData);
-    const response = await fetch("http://localhost:5000/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type" : "application/json"
-      },
-      body: JSON.stringify({ data: formData })
-    });
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({ data: formData })
+      });
 
-    console.log(await response.json());
+      const data = await response.json();
 
-    // navigate('/dashboard');
+      if (!response.ok || !data.success) {
+        const message = data.message || "Unable to sign you in. Please check your credentials.";
+        alert(message);
+        return;
+      }
+
+      // Login succeeded – send user to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Something went wrong while logging in. Please try again.");
+    }
   }
   return (
     <AuthLayout title="Welcome Back" subtitle="Monitor your growth & harvest in real-time">

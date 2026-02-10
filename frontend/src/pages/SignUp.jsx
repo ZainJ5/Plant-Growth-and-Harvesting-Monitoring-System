@@ -60,18 +60,29 @@ const SignupPage = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    console.log('Submitting Form:', formData);
-    const response = await fetch("http://localhost:5000/api/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type" : "application/json"
-      },
-      body: JSON.stringify({ data: formData })
-    });
+    try {
+      const response = await fetch("http://localhost:5000/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({ data: formData })
+      });
 
-    console.log(await response.json());
+      const data = await response.json();
 
-    // navigate('/dashboard');
+      if (!response.ok || !data.success) {
+        const message = data.message || "Unable to create your account. Please check your details.";
+        alert(message);
+        return;
+      }
+
+      // Sign up succeeded – redirect to login or dashboard
+      navigate('/login');
+    } catch (err) {
+      console.error("Signup error:", err);
+      alert("Something went wrong while creating your account. Please try again.");
+    }
   }
   
   return (
