@@ -1,12 +1,12 @@
 import express from "express";
 import multer from "multer";
+import { authenticateToken } from "../middleware/auth.js";
 import { convertBufferToBase64, identifyPlantHealth } from "../services/plantApiService.js";
 
 const router = express.Router();
-
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/plant/check", upload.single('image'), async (req, res) => {
+router.post("/plant/check", authenticateToken, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided." });

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, Upload, Loader2, CheckCircle, AlertTriangle, X, Sparkles } from 'lucide-react';
-
-const API_BASE_URL = 'http://localhost:5000';
+import { API_BASE_URL, getAuthHeaders } from '../api/config';
 
 const PlantScanner = () => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -53,13 +52,21 @@ const PlantScanner = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/plant/check`, {
         method: 'POST',
+        headers: getAuthHeaders(),
         body: formData,
       });
 
       const data = await response.json();
 
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAuthenticated');
+        window.location.href = '/login';
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to analyze plant image');
+        throw new Error(data.error || data.message || 'Failed to analyze plant image');
       }
 
       // Map backend response into a UI-friendly shape

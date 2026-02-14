@@ -1,14 +1,20 @@
 import PlantScanner from '../components/PlantScanner';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL, getAuthHeaders } from '../api/config';
 import { 
   LogOut, Leaf, Thermometer, Droplets, Wind, 
   Clock, Power, BellRing, CheckCircle2, 
-  AlertCircle, ListRestart, Zap, ShieldCheck, User, Loader2
+  ListRestart, Zap, ShieldCheck, User, Loader2
 } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  // User profile from backend
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState(null);
   
   // --- STATE MANAGEMENT ---
   const [systemTime, setSystemTime] = useState(new Date().toLocaleTimeString());
@@ -28,6 +34,36 @@ const Dashboard = () => {
       { id: 2, time: "12:15 PM", action: "System Check", status: "Healthy", type: "info" }
     ];
   });
+
+  // Fetch user profile from backend
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setProfileLoading(false);
+      return;
+    }
+    fetch(`${API_BASE_URL}/user/profile`, {
+      headers: getAuthHeaders()
+    })
+      .then((res) => {
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('isAuthenticated');
+          window.location.href = '/login';
+          return null;
+        }
+        if (!res.ok) throw new Error('Failed to load profile');
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          setUserProfile(data.user || null);
+          setProfileError(null);
+        }
+      })
+      .catch(() => setProfileError(true))
+      .finally(() => setProfileLoading(false));
+  }, []);
 
   // Update time every second
   useEffect(() => {
@@ -74,12 +110,15 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userEmail');
     navigate('/login');
   };
 
-  const userEmail = localStorage.getItem('userEmail') || 'User';
+  const displayName = userProfile
+    ? [userProfile.firstname, userProfile.lastname].filter(Boolean).join(' ') || userProfile.username || userProfile.email
+    : localStorage.getItem('userEmail') || 'User';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/20 font-sans">
@@ -109,7 +148,13 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl">
               <User size={16} className="text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">{userEmail}</span>
+              {profileLoading ? (
+                <Loader2 size={14} className="animate-spin text-slate-500" />
+              ) : profileError ? (
+                <span className="text-sm font-medium text-slate-600">{localStorage.getItem('userEmail') || 'User'}</span>
+              ) : (
+                <span className="text-sm font-medium text-slate-700">{displayName}</span>
+              )}
             </div>
             <button 
               onClick={handleLogout} 

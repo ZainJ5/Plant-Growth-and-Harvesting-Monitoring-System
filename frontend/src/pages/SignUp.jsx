@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
+import { API_BASE_URL, jsonHeaders } from '../api/config';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -113,11 +114,9 @@ const SignupPage = () => {
     setSuccess(false);
 
     try {
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetch(`${API_BASE_URL}/api/signup`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: jsonHeaders(),
         body: JSON.stringify({ data: formData })
       });
 

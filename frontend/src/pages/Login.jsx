@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
+import { API_BASE_URL, jsonHeaders } from '../api/config';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -81,27 +82,30 @@ const LoginPage = () => {
     setErrors({});
 
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const response = await fetch(`${API_BASE_URL}/user/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ data: formData })
+        headers: jsonHeaders(),
+        body: JSON.stringify({ email: formData.email, password: formData.password })
       });
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!response.ok) {
         const message = data.message || "Unable to sign you in. Please check your credentials.";
         setErrors({ general: message });
         return;
       }
 
-      // Store login state (you might want to use a proper auth context/store)
+      if (!data.token) {
+        setErrors({ general: "Invalid response from server. Please try again." });
+        return;
+      }
+
+      // Store JWT and auth state for protected routes and API calls
+      localStorage.setItem('token', data.token);
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('userEmail', formData.email);
-      
-      // Login succeeded – send user to dashboard
+
       navigate('/dashboard');
     } catch (err) {
       console.error("Login error:", err);
